@@ -1,0 +1,7 @@
+## Title: Game Master
+## Interface: 11200
+## Notes: Options to teleport, summon, kick and ban.
+## Author: Ilse
+## Version: 1.0
+
+Game Master.lua
