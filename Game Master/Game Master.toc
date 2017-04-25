@@ -2,7 +2,6 @@
 ## Interface: 11200
 ## Notes: Options to teleport, summon, kick and ban.
 ## Author: Ilse
-## Version: 1.1
-## GitHub: https://github.com/IlseElysium/AddOns/tree/master/Game%20Master
+## Version: 1.0
 
 Game Master.lua
