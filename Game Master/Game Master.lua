@@ -1,13 +1,14 @@
 ChatFrameEditBox.chatType = "GUILD";
 ChatFrameEditBox.stickyType = "GUILD";
 
+UnitPopupButtons["TICKET"] = { text = "Ticket", dist = 0 };
 UnitPopupButtons["GONAME"] = { text = "Goname", dist = 0 };
 UnitPopupButtons["NAMEGO"] = { text = "Namego", dist = 0 };
 UnitPopupButtons["KICK"] = { text = "Kick", dist = 0 };
 UnitPopupButtons["RENAME"] = { text = "Rename", dist = 0 };
 UnitPopupButtons["BAN"] = { text = "Ban", dist = 0 };
 
-UnitPopupMenus["FRIEND"] = { "WHISPER", "INVITE", "TARGET", "GUILD_PROMOTE", "GUILD_LEAVE", "GONAME", "NAMEGO", "KICK", "RENAME", "BAN", "CANCEL" };
+UnitPopupMenus["FRIEND"] = { "WHISPER", "INVITE", "TARGET", "GUILD_PROMOTE", "GUILD_LEAVE", "TICKET", "GONAME", "NAMEGO", "KICK", "RENAME", "BAN", "CANCEL" };
 
 StaticPopupDialogs["NAMEGO"] = {
   button1 = "Yes",
@@ -86,6 +87,8 @@ function UnitPopup_OnClick()
     dialog.data = name;
   elseif ( button == "GUILD_LEAVE" ) then
     StaticPopup_Show("CONFIRM_GUILD_LEAVE", GetGuildInfo("player"));
+  elseif ( button == "TICKET" ) then
+    SendChatMessage(".ticket "..DropDownList1Button1.value, "GUILD");
   elseif ( button == "GONAME" ) then
     SendChatMessage(".goname "..DropDownList1Button1.value, "GUILD");
   elseif ( button == "NAMEGO" ) then
@@ -290,7 +293,7 @@ function UnitPopup_ShowMenu(dropdownMenu, which, unit, name, userData)
   -- Show the buttons which are used by this menu
   local tooltipText;
   for index, value in UnitPopupMenus[which] do
-    if ( index > 5 and index < 11 and DropDownList1Button1.value == UnitName("player") ) then
+    if ( index > 5 and index < 12 and DropDownList1Button1.value == UnitName("player") ) then
       UnitPopupShown[index] = 0;
     end
     if ( UnitPopupShown[index] == 1 ) then
