@@ -2,7 +2,7 @@
 ## Interface: 11200
 ## Notes: Options to see tickets, teleport, summon, kick, rename and ban.
 ## Author: Ilse
-## Version: 1.4
+## Version: 1.5
 ## GitHub: https://github.com/IlseElysium/AddOns/tree/master/Game%20Master
 
 Game Master.lua

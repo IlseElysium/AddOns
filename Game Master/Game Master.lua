@@ -110,11 +110,16 @@ function UnitPopup_OnClick()
     end;
     StaticPopup_Show("RENAME");
   elseif ( button == "BAN" ) then
-    StaticPopupDialogs["BAN"].text = "Ban player "..DropDownList1Button1.value.." for:";
+    StaticPopupDialogs["BAN"].text = "Ban player "..DropDownList1Button1.value.." permanently for:";
     StaticPopupDialogs["BAN"].OnAccept = function()
       local info = ChatTypeInfo["SYSTEM"];
-      ChatFrame1:AddMessage("Ban option unavailable.", info.r, info.g, info.b, info.id);
-      --SendChatMessage(".ban character "..DropDownList1Button1.value.." -1 $reason", "GUILD");
+      ChatFrame1:AddMessage("Ban option temporarily unavailable. Still in work so the static pop up has two edit boxes to be able to choose the ban time.", info.r, info.g, info.b, info.id);
+      -- SendChatMessage(".ban character "..DropDownList1Button1.value.." -1 "..StaticPopup1EditBox:GetText(), "GUILD");
+      /*
+        Add hasDoubleEditBox to the game functions:
+        https://www.townlong-yak.com/framexml/1.12.1/StaticPopup.lua#1428
+        https://www.townlong-yak.com/framexml/1.12.1/StaticPopup.xml#84
+      */
     end;
     StaticPopup_Show("BAN");
   elseif ( button == "LEAVE" ) then
