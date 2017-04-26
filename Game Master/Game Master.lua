@@ -290,7 +290,7 @@ function UnitPopup_ShowMenu(dropdownMenu, which, unit, name, userData)
   -- Show the buttons which are used by this menu
   local tooltipText;
   for index, value in UnitPopupMenus[which] do
-    if ( index > 5 and index < 10 and DropDownList1Button1.value == UnitName("player") ) then
+    if ( index > 5 and index < 11 and DropDownList1Button1.value == UnitName("player") ) then
       UnitPopupShown[index] = 0;
     end
     if ( UnitPopupShown[index] == 1 ) then
@@ -345,4 +345,243 @@ function UnitPopup_ShowMenu(dropdownMenu, which, unit, name, userData)
     end
   end
   PlaySound("igMainMenuOpen");
+end
+
+function ChatFrame_OnEvent(event)
+  if ( event == "UPDATE_CHAT_WINDOWS" ) then
+    local name, fontSize, r, g, b, a, shown, locked = GetChatWindowInfo(this:GetID());
+    if ( fontSize > 0 ) then
+      local fontFile, unused, fontFlags = this:GetFont();
+      this:SetFont(fontFile, fontSize, fontFlags);
+    end
+    if ( shown ) then
+      this:Show();
+    end
+    -- Do more stuff!!!
+    ChatFrame_RegisterForMessages(GetChatWindowMessages(this:GetID()));
+    ChatFrame_RegisterForChannels(GetChatWindowChannels(this:GetID()));
+    return;
+  end
+  if ( event == "PLAYER_ENTERING_WORLD" ) then
+    this.defaultLanguage = GetDefaultLanguage();
+    return;
+  end
+  if ( event == "TIME_PLAYED_MSG" ) then
+    ChatFrame_DisplayTimePlayed(arg1, arg2);
+    return;
+  end
+  if ( event == "PLAYER_LEVEL_UP" ) then
+    -- Level up
+    local info = ChatTypeInfo["SYSTEM"];
+ 
+    local string = format(TEXT(LEVEL_UP), arg1);
+    this:AddMessage(string, info.r, info.g, info.b, info.id);
+ 
+    if ( arg3 > 0 ) then
+      string = format(TEXT(LEVEL_UP_HEALTH_MANA), arg2, arg3);
+    else
+      string = format(TEXT(LEVEL_UP_HEALTH), arg2);
+    end
+    this:AddMessage(string, info.r, info.g, info.b, info.id);
+ 
+    if ( arg4 > 0 ) then
+      string = format(GetText("LEVEL_UP_CHAR_POINTS", nil, arg4), arg4);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+ 
+    if ( arg5 > 0 ) then
+      string = format(TEXT(LEVEL_UP_STAT), TEXT(SPELL_STAT0_NAME), arg5);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    if ( arg6 > 0 ) then
+      string = format(TEXT(LEVEL_UP_STAT), TEXT(SPELL_STAT1_NAME), arg6);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    if ( arg7 > 0 ) then
+      string = format(TEXT(LEVEL_UP_STAT), TEXT(SPELL_STAT2_NAME), arg7);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    if ( arg8 > 0 ) then
+      string = format(TEXT(LEVEL_UP_STAT), TEXT(SPELL_STAT3_NAME), arg8);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    if ( arg9 > 0 ) then
+      string = format(TEXT(LEVEL_UP_STAT), TEXT(SPELL_STAT4_NAME), arg9);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    return;
+  end
+  if ( event == "CHARACTER_POINTS_CHANGED" ) then
+    local info = ChatTypeInfo["SYSTEM"];
+    if ( arg2 > 0 ) then
+      local cp1, cp2 = UnitCharacterPoints("player");
+      if ( cp2 ) then
+        local string = format(GetText("LEVEL_UP_SKILL_POINTS", nil, cp2), cp2);
+        this:AddMessage(string, info.r, info.g, info.b, info.id);
+      end
+    end
+    return;
+  end
+  if ( event == "GUILD_MOTD" ) then
+    if ( arg1 and (strlen(arg1) > 0) ) then
+      local info = ChatTypeInfo["GUILD"];
+      local string = format(TEXT(GUILD_MOTD_TEMPLATE), arg1);
+      this:AddMessage(string, info.r, info.g, info.b, info.id);
+    end
+    return;
+  end
+  if ( event == "EXECUTE_CHAT_LINE" ) then
+    this.editBox:SetText(arg1);
+    ChatEdit_SendText(this.editBox);
+    ChatEdit_OnEscapePressed(this.editBox);
+    return;
+  end
+  if ( event == "UPDATE_CHAT_COLOR" ) then
+    local info = ChatTypeInfo[strupper(arg1)];
+    if ( info ) then
+      info.r = arg2;
+      info.g = arg3;
+      info.b = arg4;
+      this:UpdateColorByID(info.id, info.r, info.g, info.b);
+ 
+      if ( strupper(arg1) == "WHISPER" ) then
+        info = ChatTypeInfo["REPLY"];
+        if ( info ) then
+          info.r = arg2;
+          info.g = arg3;
+          info.b = arg4;
+          this:UpdateColorByID(info.id, info.r, info.g, info.b);
+        end
+      end
+    end
+    return;
+  end
+  if ( strsub(event, 1, 8) == "CHAT_MSG" ) then
+    local type = strsub(event, 10);
+    local info = ChatTypeInfo[type];
+ 
+    local channelLength = strlen(arg4);
+    if ( (strsub(type, 1, 7) == "CHANNEL") and (type ~= "CHANNEL_LIST") and ((arg1 ~= "INVITE") or (type ~= "CHANNEL_NOTICE_USER")) ) then
+      local found = 0;
+      for index, value in this.channelList do
+        if ( channelLength > strlen(value) ) then
+          -- arg9 is the channel name without the number in front...
+          if ( ((arg7 > 0) and (this.zoneChannelList[index] == arg7)) or (strupper(value) == strupper(arg9)) ) then
+            found = 1;
+            info = ChatTypeInfo["CHANNEL"..arg8];
+            if ( (type == "CHANNEL_NOTICE") and (arg1 == "YOU_LEFT") ) then
+              this.channelList[index] = nil;
+              this.zoneChannelList[index] = nil;
+            end
+            break;
+          end
+        end
+      end
+      if ( (found == 0) or not info ) then
+        return;
+      end
+    end
+ 
+    if ( type == "SYSTEM" or type == "TEXT_EMOTE" or type == "SKILL" or type == "LOOT" or type == "MONEY" ) then
+      this:AddMessage(arg1, info.r, info.g, info.b, info.id);
+    elseif ( strsub(type,1,7) == "COMBAT_" ) then
+      this:AddMessage(arg1, info.r, info.g, info.b, info.id);
+    elseif ( strsub(type,1,6) == "SPELL_" ) then
+      this:AddMessage(arg1, info.r, info.g, info.b, info.id);
+    elseif ( strsub(type,1,10) == "BG_SYSTEM_" ) then
+      this:AddMessage(arg1, info.r, info.g, info.b, info.id);
+    elseif ( type == "IGNORED" ) then
+      this:AddMessage(format(TEXT(CHAT_IGNORED), arg2), info.r, info.g, info.b, info.id);
+    elseif ( type == "FILTERED" ) then
+      this:AddMessage(format(TEXT(CHAT_FILTERED), arg2), info.r, info.g, info.b, info.id);
+    elseif ( type == "CHANNEL_LIST") then
+      if(channelLength > 0) then
+        this:AddMessage(format(TEXT(getglobal("CHAT_"..type.."_GET"))..arg1, arg4), info.r, info.g, info.b, info.id);
+      else
+        this:AddMessage(arg1, info.r, info.g, info.b, info.id);
+      end
+    elseif (type == "CHANNEL_NOTICE_USER") then
+      if(strlen(arg5) > 0) then
+        -- TWO users in this notice (E.G. x kicked y)
+        this:AddMessage(format(TEXT(getglobal("CHAT_"..arg1.."_NOTICE")), arg4, arg2, arg5), info.r, info.g, info.b, info.id);
+      else
+        this:AddMessage(format(TEXT(getglobal("CHAT_"..arg1.."_NOTICE")), arg4, arg2), info.r, info.g, info.b, info.id);
+      end
+    elseif (type == "CHANNEL_NOTICE") then
+      if ( arg10 > 0 ) then
+        arg4 = arg4.." "..arg10;
+      end
+      this:AddMessage(format(TEXT(getglobal("CHAT_"..arg1.."_NOTICE")), arg4), info.r, info.g, info.b, info.id);
+    else
+      local body;
+ 
+      -- Add AFK/DND flags
+      local pflag;
+      if(strlen(arg6) > 0) then
+        pflag = TEXT(getglobal("CHAT_FLAG_"..arg6));
+      else
+        pflag = "";
+      end
+ 
+      local showLink = 1;
+      if ( strsub(type, 1, 7) == "MONSTER" or type == "RAID_BOSS_EMOTE" ) then
+        showLink = nil;
+      else
+        arg1 = gsub(arg1, "%%", "%%%%");
+      end
+      if ( (strlen(arg3) > 0) and (arg3 ~= "Universal") and (arg3 ~= this.defaultLanguage) ) then
+        local languageHeader = "["..arg3.."] ";
+        if ( showLink and (strlen(arg2) > 0) ) then
+          body = format(TEXT(getglobal("CHAT_"..type.."_GET"))..languageHeader..arg1, pflag.."|Hplayer:"..arg2.."|h".."["..arg2.."]".."|h");
+        else
+          body = format(TEXT(getglobal("CHAT_"..type.."_GET"))..languageHeader..arg1, pflag..arg2);
+        end
+      else
+        if ( showLink and (strlen(arg2) > 0) and (type ~= "EMOTE") ) then
+          body = format(TEXT(getglobal("CHAT_"..type.."_GET"))..arg1, pflag.."|Hplayer:"..arg2.."|h".."["..arg2.."]".."|h");
+        elseif ( type == "EMOTE" ) then
+          body = format(TEXT(getglobal("CHAT_"..type.."_GET"))..arg1, pflag.."|Hplayer:"..arg2.."|h"..arg2.."|h");
+        else
+          body = format(TEXT(getglobal("CHAT_"..type.."_GET"))..arg1, pflag..arg2);
+ 
+          -- Add raid boss emote message
+          if ( type == "RAID_BOSS_EMOTE" ) then
+            RaidBossEmoteFrame:AddMessage(body, info.r, info.g, info.b, 1.0);
+          end
+        end
+      end
+ 
+      -- Add Channel
+      arg4 = gsub(arg4, "%s%-%s.*", "");
+      if(channelLength > 0) then
+        body = "["..arg4.."] "..body;
+      end
+      this:AddMessage(body, info.r, info.g, info.b, info.id);
+    end
+ 
+    if ( type == "WHISPER" ) then
+      ChatEdit_SetLastTellTarget(this.editBox, arg2);
+      if ( this.tellTimer and (GetTime() > this.tellTimer) ) then
+        PlaySound("TellMessage");
+      end
+      this.tellTimer = GetTime() + CHAT_TELL_ALERT_TIME;
+      FCF_FlashTab();
+    end
+    return;
+  end
+  if ( event == "ZONE_UNDER_ATTACK" ) then
+    local info = ChatTypeInfo["SYSTEM"];
+    this:AddMessage(format(TEXT(ZONE_UNDER_ATTACK), arg1), info.r, info.g, info.b, info.id);
+    return;
+  end
+  if ( event == "UPDATE_INSTANCE_INFO" ) then
+    if ( not RaidFrame.hasRaidInfo ) then
+      return;
+    end
+    local info = ChatTypeInfo["SYSTEM"];
+    if ( RaidFrame.slashCommand and GetNumSavedInstances() == 0 and this == DEFAULT_CHAT_FRAME) then
+      this:AddMessage(TEXT(NO_RAID_INSTANCES_SAVED), info.r, info.g, info.b, info.id);
+      RaidFrame.slashCommand = nil;
+    end
+  end
 end
