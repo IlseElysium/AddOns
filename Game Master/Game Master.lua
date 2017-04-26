@@ -4,9 +4,10 @@ ChatFrameEditBox.stickyType = "GUILD";
 UnitPopupButtons["GONAME"] = { text = "Goname", dist = 0 };
 UnitPopupButtons["NAMEGO"] = { text = "Namego", dist = 0 };
 UnitPopupButtons["KICK"] = { text = "Kick", dist = 0 };
+UnitPopupButtons["RENAME"] = { text = "Rename", dist = 0 };
 UnitPopupButtons["BAN"] = { text = "Ban", dist = 0 };
 
-UnitPopupMenus["FRIEND"] = { "WHISPER", "INVITE", "TARGET", "GUILD_PROMOTE", "GUILD_LEAVE", "GONAME", "NAMEGO", "KICK", "BAN", "CANCEL" };
+UnitPopupMenus["FRIEND"] = { "WHISPER", "INVITE", "TARGET", "GUILD_PROMOTE", "GUILD_LEAVE", "GONAME", "NAMEGO", "KICK", "RENAME", "BAN", "CANCEL" };
 
 StaticPopupDialogs["NAMEGO"] = {
   button1 = "Yes",
@@ -17,6 +18,14 @@ StaticPopupDialogs["NAMEGO"] = {
 };
 
 StaticPopupDialogs["KICK"] = {
+  button1 = "Yes",
+  button2 = "No",
+  hideOnEscape = 1,
+  showAlert = 1,
+  timeout = 0
+};
+
+StaticPopupDialogs["RENAME"] = {
   button1 = "Yes",
   button2 = "No",
   hideOnEscape = 1,
@@ -91,6 +100,12 @@ function UnitPopup_OnClick()
       SendChatMessage(".kick "..DropDownList1Button1.value, "GUILD");
     end;
     StaticPopup_Show("KICK");
+  elseif ( button == "RENAME" ) then
+    StaticPopupDialogs["RENAME"].text = "Rename player "..DropDownList1Button1.value.."?";
+    StaticPopupDialogs["RENAME"].OnAccept = function()
+      SendChatMessage(".character rename "..DropDownList1Button1.value, "GUILD");
+    end;
+    StaticPopup_Show("RENAME");
   elseif ( button == "BAN" ) then
     StaticPopupDialogs["BAN"].text = "Ban player "..DropDownList1Button1.value.." for:";
     StaticPopupDialogs["BAN"].OnAccept = function()
